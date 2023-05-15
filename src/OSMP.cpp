@@ -225,6 +225,10 @@ fmi2Status OSMP::DoInit()
 
     const double nominal_range = 135.0;
     SetFmiNominalRange(nominal_range);
+
+    const char * protocol = "tcp://127.0.0.1:3456";
+    socket_.bind(protocol);
+
     return fmi2OK;
 }
 
@@ -261,34 +265,39 @@ fmi2Status OSMP::DoExitInitializationMode()
                   config.mounting_position().orientation().yaw());
     }
 
-    // initialize sensor model
-    my_sensor_model_.Init(FmiNominalRange());
-
     return fmi2OK;
 }
 
 fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communication_step_size, fmi2Boolean no_set_fmu_state_prior_to_current_pointfmi_2_component)
 {
 
-    osi3::SensorView current_in;
+    void* buffer = DecodeIntegerToPointer(integer_vars_[FMI_INTEGER_SENSORVIEW_IN_BASEHI_IDX],integer_vars_[FMI_INTEGER_SENSORVIEW_IN_BASELO_IDX]);
+    int buffersize = integer_vars_[FMI_INTEGER_SENSORVIEW_IN_SIZE_IDX];
+
+    zmq::message_t request(buffer, buffersize, NULL);
+    std::cout << "sending";
+    socket_.send(request);
+    std::cout << "\"... done." << std::endl;
+
+    /*osi3::SensorView current_in;
     double time = current_communication_point + communication_step_size;
     NormalLog("OSI", "Calculating Sensor at %f for %f (step size %f)", current_communication_point, time, communication_step_size);
     if (GetFmiSensorViewIn(current_in))
     {
         osi3::SensorData current_out = my_sensor_model_.Step(current_in, time);
-        /* Serialize */
+        // Serialize
         SetFmiSensorDataOut(current_out);
         SetFmiValid(1);
         SetFmiCount(current_out.moving_object_size());
     }
     else
     {
-        /* We have no valid input, so no valid output */
+        // We have no valid input, so no valid output
         NormalLog("OSI", "No valid input, therefore providing no valid output.");
         ResetFmiSensorDataOut();
         SetFmiValid(0);
         SetFmiCount(0);
-    }
+    }*/
     return fmi2OK;
 }
 

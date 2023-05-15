@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fmiModelDescription
   fmiVersion="2.0"
-  modelName="sl-1-0-sensor-model-repository-template"
+  modelName="osmp-network-proxy"
   guid="@FMUGUID@"
-  description="Demonstration C++ Sensor FMU for OSI Sensor Model Packaging within OpenMSL"
+  description="TCP/IP Network Proxy for SensorView and SensorData"
   author="Persival GmbH"
   version="@OSMPVERSION@"
-  generationTool="Based on OSMPDummySensor"
+  generationTool="Based on OSMPNetworkProxy"
   generationDateAndTime="@FMUTIMESTAMP@"
   variableNamingConvention="structured">
   <CoSimulation
-    modelIdentifier="sl-1-0-sensor-model-repository-template"
+    modelIdentifier="osmp-network-proxy"
     canHandleVariableCommunicationStepSize="true"
     canNotUseMemoryManagementFunctions="true">
     <SourceFiles>
