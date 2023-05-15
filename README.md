@@ -10,7 +10,6 @@ The proxy can also send SensorView oder SensorData received as FMU input via TCP
 < Eye-catcher Image >
 <!--img src="doc/img/model_video.gif" width="800" /-->
 
-
 ## Parameterization
 
 The following FMI parameters can be set:
