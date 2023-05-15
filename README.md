@@ -38,7 +38,7 @@ The Proxy can receive SensorView or SensorData as input.
 2. Install dependencies:
 
    ```bash
-   sudo apt install libzmq5
+   sudo apt install libzmq3-dev
    ```
 
 3. Build the model by executing in the extracted project root directory:
