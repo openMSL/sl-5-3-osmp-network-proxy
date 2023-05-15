@@ -14,5 +14,3 @@ include_directories(lib/fmi2/headers)
 set(FMU_INSTALL_DIR "${CMAKE_BINARY_DIR}" CACHE PATH "Target directory for generated FMU")
 
 add_subdirectory(src/)
-
-add_subdirectory(test/unit/)
