@@ -40,7 +40,6 @@
 #endif
 
 #include <algorithm>
-#include <cmath>
 #include <cstdint>
 #include <string>
 
@@ -65,10 +64,10 @@ void* DecodeIntegerToPointer(fmi2Integer hi, fmi2Integer lo)
             int hi;
         } base;
         unsigned long long address;
-    } myaddr;
+    } myaddr{};
     myaddr.base.lo = lo;
     myaddr.base.hi = hi;
-    return reinterpret_cast<void*>(myaddr.address);
+    return (void*)myaddr.address;
 #elif PTRDIFF_MAX == INT32_MAX
     return reinterpret_cast<void*>(lo);
 #else
@@ -87,8 +86,8 @@ void EncodePointerToInteger(const void* ptr, fmi2Integer& hi, fmi2Integer& lo)
             int hi;
         } base;
         unsigned long long address;
-    } myaddr;
-    myaddr.address = reinterpret_cast<unsigned long long>(ptr);
+    } myaddr{};
+    myaddr.address = (unsigned long long)ptr;
     hi = myaddr.base.hi;
     lo = myaddr.base.lo;
 #elif PTRDIFF_MAX == INT32_MAX
@@ -97,99 +96,6 @@ void EncodePointerToInteger(const void* ptr, fmi2Integer& hi, fmi2Integer& lo)
 #else
 #error "Cannot determine 32bit or 64bit environment!"
 #endif
-}
-
-bool OSMP::GetFmiSensorViewConfig(osi3::SensorViewConfiguration& data)
-{
-    if (integer_vars_[FMI_INTEGER_SENSORVIEW_CONFIG_SIZE_IDX] > 0)
-    {
-        void* buffer = DecodeIntegerToPointer(integer_vars_[FMI_INTEGER_SENSORVIEW_CONFIG_BASEHI_IDX], integer_vars_[FMI_INTEGER_SENSORVIEW_CONFIG_BASELO_IDX]);
-        NormalLog(
-            "OSMP", "Got %08X %08X, reading from %p ...", integer_vars_[FMI_INTEGER_SENSORVIEW_CONFIG_BASEHI_IDX], integer_vars_[FMI_INTEGER_SENSORVIEW_CONFIG_BASELO_IDX], buffer);
-        data.ParseFromArray(buffer, integer_vars_[FMI_INTEGER_SENSORVIEW_CONFIG_SIZE_IDX]);
-        return true;
-    }
-    return false;
-}
-
-void OSMP::SetFmiSensorViewConfigRequest(const osi3::SensorViewConfiguration& data)
-{
-    data.SerializeToString(current_config_request_buffer_);
-    EncodePointerToInteger(
-        current_config_request_buffer_->data(), integer_vars_[FMI_INTEGER_SENSORVIEW_CONFIG_REQUEST_BASEHI_IDX], integer_vars_[FMI_INTEGER_SENSORVIEW_CONFIG_REQUEST_BASELO_IDX]);
-    integer_vars_[FMI_INTEGER_SENSORVIEW_CONFIG_REQUEST_SIZE_IDX] = (fmi2Integer)current_config_request_buffer_->length();
-    NormalLog("OSMP",
-              "Providing %08X %08X, writing from %p ...",
-              integer_vars_[FMI_INTEGER_SENSORVIEW_CONFIG_REQUEST_BASEHI_IDX],
-              integer_vars_[FMI_INTEGER_SENSORVIEW_CONFIG_REQUEST_BASELO_IDX],
-              current_config_request_buffer_->data());
-    swap(current_config_request_buffer_, last_config_request_buffer_);
-}
-
-void OSMP::ResetFmiSensorViewConfigRequest()
-{
-    integer_vars_[FMI_INTEGER_SENSORVIEW_CONFIG_REQUEST_SIZE_IDX] = 0;
-    integer_vars_[FMI_INTEGER_SENSORVIEW_CONFIG_REQUEST_BASEHI_IDX] = 0;
-    integer_vars_[FMI_INTEGER_SENSORVIEW_CONFIG_REQUEST_BASELO_IDX] = 0;
-}
-
-bool OSMP::GetFmiSensorViewIn(osi3::SensorView& data)
-{
-    if (integer_vars_[FMI_INTEGER_SENSORVIEW_IN_SIZE_IDX] > 0)
-    {
-        void* buffer = DecodeIntegerToPointer(integer_vars_[FMI_INTEGER_SENSORVIEW_IN_BASEHI_IDX], integer_vars_[FMI_INTEGER_SENSORVIEW_IN_BASELO_IDX]);
-        NormalLog("OSMP", "Got %08X %08X, reading from %p ...", integer_vars_[FMI_INTEGER_SENSORVIEW_IN_BASEHI_IDX], integer_vars_[FMI_INTEGER_SENSORVIEW_IN_BASELO_IDX], buffer);
-        data.ParseFromArray(buffer, integer_vars_[FMI_INTEGER_SENSORVIEW_IN_SIZE_IDX]);
-        return true;
-    }
-    return false;
-}
-
-void OSMP::SetFmiSensorDataOut(const osi3::SensorData& data)
-{
-    data.SerializeToString(current_output_buffer_);
-    EncodePointerToInteger(current_output_buffer_->data(), integer_vars_[FMI_INTEGER_SENSORDATA_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_SENSORDATA_OUT_BASELO_IDX]);
-    integer_vars_[FMI_INTEGER_SENSORDATA_OUT_SIZE_IDX] = (fmi2Integer)current_output_buffer_->length();
-    NormalLog("OSMP",
-              "Providing %08X %08X, writing from %p ...",
-              integer_vars_[FMI_INTEGER_SENSORDATA_OUT_BASEHI_IDX],
-              integer_vars_[FMI_INTEGER_SENSORDATA_OUT_BASELO_IDX],
-              current_output_buffer_->data());
-    swap(current_output_buffer_, last_output_buffer_);
-}
-
-void OSMP::ResetFmiSensorDataOut()
-{
-    integer_vars_[FMI_INTEGER_SENSORDATA_OUT_SIZE_IDX] = 0;
-    integer_vars_[FMI_INTEGER_SENSORDATA_OUT_BASEHI_IDX] = 0;
-    integer_vars_[FMI_INTEGER_SENSORDATA_OUT_BASELO_IDX] = 0;
-}
-
-void OSMP::RefreshFmiSensorViewConfigRequest()
-{
-    osi3::SensorViewConfiguration config;
-    if (GetFmiSensorViewConfig(config))
-    {
-        SetFmiSensorViewConfigRequest(config);
-    }
-    else
-    {
-        config.Clear();
-        config.mutable_version()->CopyFrom(osi3::InterfaceVersion::descriptor()->file()->options().GetExtension(osi3::current_interface_version));
-        const double field_of_view = 3.14;
-        const double range_factor = 1.1;
-        const uint32_t update_nanos = 20000000;
-        config.set_field_of_view_horizontal(field_of_view);
-        config.set_field_of_view_vertical(field_of_view);
-        config.set_range(FmiNominalRange() * range_factor);
-        config.mutable_update_cycle_time()->set_seconds(0);
-        config.mutable_update_cycle_time()->set_nanos(update_nanos);
-        config.mutable_update_cycle_offset()->Clear();
-        osi3::GenericSensorViewConfiguration* generic = config.add_generic_sensor_view_configuration();
-        generic->set_field_of_view_horizontal(field_of_view);
-        generic->set_field_of_view_vertical(field_of_view);
-        SetFmiSensorViewConfigRequest(config);
-    }
 }
 
 /*
@@ -223,11 +129,13 @@ fmi2Status OSMP::DoInit()
         string_var = "";
     }
 
-    const double nominal_range = 135.0;
-    SetFmiNominalRange(nominal_range);
+    //Set default values
+    SetFmiSender(1);
+    SetFmiReceiver(0);
+    SetFmiIp("127.0.0.1");
+    SetFmiPort("3456");
 
-    const char * protocol = "tcp://127.0.0.1:3456";
-    socket_.bind(protocol);
+    //todo: set default values
 
     return fmi2OK;
 }
@@ -244,26 +152,11 @@ fmi2Status OSMP::DoEnterInitializationMode()
 
 fmi2Status OSMP::DoExitInitializationMode()
 {
-    osi3::SensorViewConfiguration config;
-    if (!GetFmiSensorViewConfig(config))
-    {
-        NormalLog("OSI", "Received no valid SensorViewConfiguration from Simulation Environment, assuming everything checks out.");
-    }
-    else
-    {
-        NormalLog("OSI", "Received SensorViewConfiguration for Sensor Id %llu", config.sensor_id().value());
-        NormalLog("OSI", "SVC Ground Truth FoV Horizontal %f, FoV Vertical %f, Range %f", config.field_of_view_horizontal(), config.field_of_view_vertical(), config.range());
-        NormalLog("OSI",
-                  "SVC Mounting Position: (%f, %f, %f)",
-                  config.mounting_position().position().x(),
-                  config.mounting_position().position().y(),
-                  config.mounting_position().position().z());
-        NormalLog("OSI",
-                  "SVC Mounting Orientation: (%f, %f, %f)",
-                  config.mounting_position().orientation().roll(),
-                  config.mounting_position().orientation().pitch(),
-                  config.mounting_position().orientation().yaw());
-    }
+
+    string address = "tcp://" + FmiIp() + ":" + FmiPort();
+    std::cout << address << std::endl;
+    const char * protocol = address.c_str();
+    socket_.bind(protocol);
 
     return fmi2OK;
 }
@@ -271,33 +164,45 @@ fmi2Status OSMP::DoExitInitializationMode()
 fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communication_step_size, fmi2Boolean no_set_fmu_state_prior_to_current_pointfmi_2_component)
 {
 
-    void* buffer = DecodeIntegerToPointer(integer_vars_[FMI_INTEGER_SENSORVIEW_IN_BASEHI_IDX],integer_vars_[FMI_INTEGER_SENSORVIEW_IN_BASELO_IDX]);
-    int buffersize = integer_vars_[FMI_INTEGER_SENSORVIEW_IN_SIZE_IDX];
+    void* buffer = DecodeIntegerToPointer(integer_vars_[FMI_INTEGER_OSI_IN_BASEHI_IDX],integer_vars_[FMI_INTEGER_OSI_IN_BASELO_IDX]);
+    int buffer_size = integer_vars_[FMI_INTEGER_OSI_IN_SIZE_IDX];
 
-    zmq::message_t request(buffer, buffersize, NULL);
-    std::cout << "sending";
-    socket_.send(request);
-    std::cout << "\"... done." << std::endl;
-
-    /*osi3::SensorView current_in;
-    double time = current_communication_point + communication_step_size;
-    NormalLog("OSI", "Calculating Sensor at %f for %f (step size %f)", current_communication_point, time, communication_step_size);
-    if (GetFmiSensorViewIn(current_in))
+    if (FmiSender() != 0)
     {
-        osi3::SensorData current_out = my_sensor_model_.Step(current_in, time);
-        // Serialize
-        SetFmiSensorDataOut(current_out);
+        zmq::message_t send_message(buffer, buffer_size, nullptr);
+        socket_.send(send_message, zmq::send_flags::none);
+
+        current_output_buffer_ = static_cast<string*>(buffer);
+        EncodePointerToInteger(current_output_buffer_->data(), integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX]);
+        integer_vars_[FMI_INTEGER_OSI_OUT_SIZE_IDX] = (fmi2Integer)current_output_buffer_->length();
+        NormalLog("OSMP",
+                  "Providing %08X %08X, writing from %p ...",
+                  integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX],
+                  integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX],
+                  current_output_buffer_->data());
+        swap(current_output_buffer_, last_output_buffer_);
         SetFmiValid(1);
-        SetFmiCount(current_out.moving_object_size());
     }
-    else
+
+    if (FmiReceiver() != 0)
     {
-        // We have no valid input, so no valid output
-        NormalLog("OSI", "No valid input, therefore providing no valid output.");
-        ResetFmiSensorDataOut();
-        SetFmiValid(0);
-        SetFmiCount(0);
-    }*/
+        zmq::message_t rec_message;
+        socket_.recv(rec_message, zmq::recv_flags::none);
+
+        string tmp_buffer = rec_message.to_string();
+        current_output_buffer_ = &tmp_buffer;
+
+        EncodePointerToInteger(current_output_buffer_->data(), integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX]);
+        integer_vars_[FMI_INTEGER_OSI_OUT_SIZE_IDX] = (fmi2Integer)current_output_buffer_->length();
+        NormalLog("OSMP",
+                  "Providing %08X %08X, writing from %p ...",
+                  integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX],
+                  integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX],
+                  current_output_buffer_->data());
+        swap(current_output_buffer_, last_output_buffer_);
+        SetFmiValid(1);
+    }
+
     return fmi2OK;
 }
 
@@ -490,12 +395,6 @@ fmi2Status OSMP::GetInteger(const fmi2ValueReference vr[], size_t nvr, fmi2Integ
     {
         if (vr[i] < FMI_INTEGER_VARS)
         {
-            if (need_refresh && (vr[i] == FMI_INTEGER_SENSORVIEW_CONFIG_REQUEST_BASEHI_IDX || vr[i] == FMI_INTEGER_SENSORVIEW_CONFIG_REQUEST_BASELO_IDX ||
-                                 vr[i] == FMI_INTEGER_SENSORVIEW_CONFIG_REQUEST_SIZE_IDX))
-            {
-                RefreshFmiSensorViewConfigRequest();
-                need_refresh = false;
-            }
             value[i] = integer_vars_[vr[i]];
         }
         else

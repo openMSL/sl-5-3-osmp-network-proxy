@@ -39,33 +39,29 @@
 
 /* Boolean Variables */
 #define FMI_BOOLEAN_VALID_IDX 0
-#define FMI_BOOLEAN_LAST_IDX FMI_BOOLEAN_VALID_IDX
+#define FMI_BOOLEAN_SENDER_IDX 1
+#define FMI_BOOLEAN_RECEIVER_IDX 2
+#define FMI_BOOLEAN_LAST_IDX FMI_BOOLEAN_RECEIVER_IDX
 #define FMI_BOOLEAN_VARS (FMI_BOOLEAN_LAST_IDX + 1)
 
 /* Integer Variables */
-#define FMI_INTEGER_SENSORVIEW_IN_BASELO_IDX 0
-#define FMI_INTEGER_SENSORVIEW_IN_BASEHI_IDX 1
-#define FMI_INTEGER_SENSORVIEW_IN_SIZE_IDX 2
-#define FMI_INTEGER_SENSORDATA_OUT_BASELO_IDX 3
-#define FMI_INTEGER_SENSORDATA_OUT_BASEHI_IDX 4
-#define FMI_INTEGER_SENSORDATA_OUT_SIZE_IDX 5
-#define FMI_INTEGER_SENSORVIEW_CONFIG_REQUEST_BASELO_IDX 6
-#define FMI_INTEGER_SENSORVIEW_CONFIG_REQUEST_BASEHI_IDX 7
-#define FMI_INTEGER_SENSORVIEW_CONFIG_REQUEST_SIZE_IDX 8
-#define FMI_INTEGER_SENSORVIEW_CONFIG_BASELO_IDX 9
-#define FMI_INTEGER_SENSORVIEW_CONFIG_BASEHI_IDX 10
-#define FMI_INTEGER_SENSORVIEW_CONFIG_SIZE_IDX 11
-#define FMI_INTEGER_COUNT_IDX 12
-#define FMI_INTEGER_LAST_IDX FMI_INTEGER_COUNT_IDX
+#define FMI_INTEGER_OSI_IN_BASELO_IDX 0
+#define FMI_INTEGER_OSI_IN_BASEHI_IDX 1
+#define FMI_INTEGER_OSI_IN_SIZE_IDX 2
+#define FMI_INTEGER_OSI_OUT_BASELO_IDX 3
+#define FMI_INTEGER_OSI_OUT_BASEHI_IDX 4
+#define FMI_INTEGER_OSI_OUT_SIZE_IDX 5
+#define FMI_INTEGER_LAST_IDX FMI_INTEGER_OSI_OUT_SIZE_IDX
 #define FMI_INTEGER_VARS (FMI_INTEGER_LAST_IDX + 1)
 
 /* Real Variables */
-#define FMI_REAL_NOMINAL_RANGE_IDX 0
-#define FMI_REAL_LAST_IDX FMI_REAL_NOMINAL_RANGE_IDX
+#define FMI_REAL_LAST_IDX 0
 #define FMI_REAL_VARS (FMI_REAL_LAST_IDX + 1)
 
 /* String Variables */
-#define FMI_STRING_LAST_IDX 0
+#define FMI_STRING_IP_IDX 0
+#define FMI_STRING_PORT_IDX 1
+#define FMI_STRING_LAST_IDX FMI_STRING_PORT_IDX
 #define FMI_STRING_VARS (FMI_STRING_LAST_IDX + 1)
 
 #include <cstdarg>
@@ -238,21 +234,37 @@ class OSMP
     {
         boolean_vars_[FMI_BOOLEAN_VALID_IDX] = value;
     }
-    fmi2Integer FmiCount()
+    fmi2Boolean FmiReceiver()
     {
-        return integer_vars_[FMI_INTEGER_COUNT_IDX];
+        return boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX];
     }
-    void SetFmiCount(fmi2Integer value)
+    void SetFmiReceiver(fmi2Boolean value)
     {
-        integer_vars_[FMI_INTEGER_COUNT_IDX] = value;
+        boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX] = value;
     }
-    fmi2Real FmiNominalRange()
+    fmi2Boolean FmiSender()
     {
-        return real_vars_[FMI_REAL_NOMINAL_RANGE_IDX];
+        return boolean_vars_[FMI_BOOLEAN_SENDER_IDX];
     }
-    void SetFmiNominalRange(fmi2Real value)
+    void SetFmiSender(fmi2Boolean value)
     {
-        real_vars_[FMI_REAL_NOMINAL_RANGE_IDX] = value;
+        boolean_vars_[FMI_BOOLEAN_SENDER_IDX] = value;
+    }
+    string FmiIp()
+    {
+        return string_vars_[FMI_STRING_IP_IDX];
+    }
+    void SetFmiIp(fmi2String value)
+    {
+        string_vars_[FMI_STRING_IP_IDX] = value;
+    }
+    string FmiPort()
+    {
+        return string_vars_[FMI_STRING_PORT_IDX];
+    }
+    void SetFmiPort(fmi2String value)
+    {
+        string_vars_[FMI_STRING_PORT_IDX] = value;
     }
 
     /* Protocol Buffer Accessors */
