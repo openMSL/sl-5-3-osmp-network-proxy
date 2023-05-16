@@ -11,15 +11,19 @@ configure_file(modelDescription.in.xml modelDescription.xml @ONLY)
 find_package(Protobuf 2.6.1 REQUIRED)
 add_library(osmp-network-proxy SHARED
 		OSMP.cpp
-		OSMP.h
-		MySensorModel.cpp
-		MySensorModel.h)
+		OSMP.h)
 set_target_properties(osmp-network-proxy PROPERTIES PREFIX "")
 target_compile_definitions(osmp-network-proxy PRIVATE "FMU_SHARED_OBJECT")
+
+find_library(ZeroMQ_LIBRARY
+		NAMES zmq
+		PATHS ${PC_ZeroMQ_LIBRARY_DIRS}
+		)
+
 if(LINK_WITH_SHARED_OSI)
-	target_link_libraries(osmp-network-proxy open_simulation_interface)
+	target_link_libraries(osmp-network-proxy open_simulation_interface ${ZeroMQ_LIBRARY})
 else()
-	target_link_libraries(osmp-network-proxy open_simulation_interface_pic)
+	target_link_libraries(osmp-network-proxy open_simulation_interface_pic ${ZeroMQ_LIBRARY})
 endif()
 
 if(WIN32)
@@ -51,8 +55,5 @@ add_custom_command(TARGET osmp-network-proxy
 		COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/modelDescription.xml" "${CMAKE_CURRENT_BINARY_DIR}/buildfmu"
 		COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/OSMP.cpp" "${CMAKE_CURRENT_BINARY_DIR}/buildfmu/sources/"
 		COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/OSMP.h" "${CMAKE_CURRENT_BINARY_DIR}/buildfmu/sources/"
-		COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/MySensorModel.cpp" "${CMAKE_CURRENT_BINARY_DIR}/buildfmu/sources/"
-		COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/MySensorModel.h" "${CMAKE_CURRENT_BINARY_DIR}/buildfmu/sources/"
-		COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/../osmp-network-proxy.srmd" "${CMAKE_CURRENT_BINARY_DIR}/buildfmu/extra/net.pmsf.ssp.srmd/resourceMetaData.srmd"
 		COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:osmp-network-proxy> $<$<PLATFORM_ID:Windows>:$<$<CONFIG:Debug>:$<TARGET_PDB_FILE:osmp-network-proxy>>> "${CMAKE_CURRENT_BINARY_DIR}/buildfmu/binaries/${FMI_BINARIES_PLATFORM}"
 		COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_CURRENT_BINARY_DIR}/buildfmu" ${CMAKE_COMMAND} -E tar "cfv" "${FMU_INSTALL_DIR}/osmp-network-proxy.fmu" --format=zip "modelDescription.xml" "${CMAKE_CURRENT_BINARY_DIR}/buildfmu/sources" "${CMAKE_CURRENT_BINARY_DIR}/buildfmu/binaries/${FMI_BINARIES_PLATFORM}")

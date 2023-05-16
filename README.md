@@ -10,28 +10,24 @@ The proxy can also send SensorView oder SensorData received as FMU input via TCP
 < Eye-catcher Image >
 <!--img src="doc/img/model_video.gif" width="800" /-->
 
-
 ## Parameterization
 
-The following FMI parameters can be set:
+The following FMI parameters can be set.
+Either `sender` or `receiver` have to be set to _true_.
+Otherwise, the FMU will return with an error.
 
-| Type    | Parameter  | Description                                |
-|---------|------------|--------------------------------------------|
-| Boolean | `sender`   | Set if Proxy shall send data via TCP/IP    |
-| Boolean | `receiver` | Set if Proxy shall receive data via TCP/IP |
-| String  | `ip`       | IP address of TCP connection               |
-| String  | `port`     | Port of TCP connection                     |
+| Type    | Parameter  | Default     | Description                                |
+|---------|------------|-------------|--------------------------------------------|
+| Boolean | `sender`   | _true_      | Set if Proxy shall send data via TCP/IP    |
+| Boolean | `receiver` | _false_     | Set if Proxy shall receive data via TCP/IP |
+| String  | `ip`       | _127.0.0.1_ | IP address of TCP connection               |
+| String  | `port`     | _3456_      | Port of TCP connection                     |
 
 ## Interface
 
 The Proxy can receive SensorView or SensorData as input.
 
 ## Build Instructions
-
-What are the dependencies for building the model?
-
-Give step-by-step build instructions for supported operating systems.
-The following is an example for building a model as an FMU in Ubuntu.
 
 ### Build Model in Ubuntu 18.04 / 20.04
 
@@ -41,7 +37,13 @@ The following is an example for building a model as an FMU in Ubuntu.
     git clone https://github.com/openMSL/your-model.git --recurse-submodules
     ```
 
-2. Build the model by executing in the extracted project root directory:
+2. Install dependencies:
+
+   ```bash
+   sudo apt install libzmq3-dev
+   ```
+
+3. Build the model by executing in the extracted project root directory:
 
     ```bash
     mkdir cmake-build
@@ -51,4 +53,4 @@ The following is an example for building a model as an FMU in Ubuntu.
     make
     ```
 
-3. Take FMU from `FMU_INSTALL_DIR`
+4. Take FMU from `FMU_INSTALL_DIR`
