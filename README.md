@@ -1,6 +1,6 @@
 # OSMP Network Proxy
 
-[![Credibility Assessment](../../actions/workflows/credibility_assessment.yml/badge.svg)](https://github.com/openMSL/sl-1-0-sensor-model-repository-template/actions/workflows/credibility_assessment.yml)
+![Credibility Assessment](../../actions/workflows/credibility_assessment.yml/badge.svg)
 
 This Network Proxy FMU can receive SensorView and SensorData via TCP/IP using ZeroMQ.
 The received data is directly given to the FMU output.
