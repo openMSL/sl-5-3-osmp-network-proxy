@@ -25,12 +25,12 @@ The Proxy can receive SensorView or SensorData as input.
 
 ## Build Instructions
 
-### Build Model in Ubuntu 18.04 / 20.04
+### Build Model in Ubuntu 20.04 / 22.04
 
 1. Clone this repository **with submodules**:
 
     ```bash
-    git clone https://github.com/openMSL/your-model.git --recurse-submodules
+    git clone https://github.com/Persival-GmbH/osmp-network-proxy.git --recurse-submodules
     ```
 
 2. Install dependencies:
