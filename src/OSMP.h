@@ -226,15 +226,44 @@ class OSMP
     zmq::socket_t socket_ = zmq::socket_t(context_, ZMQ_PUSH);
 
     /* Simple Accessors */
-    fmi2Boolean FmiValid() { return boolean_vars_[FMI_BOOLEAN_VALID_IDX]; }
-    void SetFmiValid(fmi2Boolean value) { boolean_vars_[FMI_BOOLEAN_VALID_IDX] = value; }
-    fmi2Boolean FmiReceiver() { return boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX]; }
-    void SetFmiReceiver(fmi2Boolean value) { boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX] = value; }
-    fmi2Boolean FmiSender() { return boolean_vars_[FMI_BOOLEAN_SENDER_IDX]; }
-    void SetFmiSender(fmi2Boolean value) { boolean_vars_[FMI_BOOLEAN_SENDER_IDX] = value; }
-    string FmiIp() { return string_vars_[FMI_STRING_IP_IDX]; }
-    void SetFmiIp(fmi2String value) { string_vars_[FMI_STRING_IP_IDX] = value; }
-    string FmiPort() { return string_vars_[FMI_STRING_PORT_IDX]; }
-    void SetFmiPort(fmi2String value) { string_vars_[FMI_STRING_PORT_IDX] = value; }
-
+    fmi2Boolean FmiValid()
+    {
+        return boolean_vars_[FMI_BOOLEAN_VALID_IDX];
+    }
+    void SetFmiValid(fmi2Boolean value)
+    {
+        boolean_vars_[FMI_BOOLEAN_VALID_IDX] = value;
+    }
+    fmi2Boolean FmiReceiver()
+    {
+        return boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX];
+    }
+    void SetFmiReceiver(fmi2Boolean value)
+    {
+        boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX] = value;
+    }
+    fmi2Boolean FmiSender()
+    {
+        return boolean_vars_[FMI_BOOLEAN_SENDER_IDX];
+    }
+    void SetFmiSender(fmi2Boolean value)
+    {
+        boolean_vars_[FMI_BOOLEAN_SENDER_IDX] = value;
+    }
+    string FmiIp()
+    {
+        return string_vars_[FMI_STRING_IP_IDX];
+    }
+    void SetFmiIp(fmi2String value)
+    {
+        string_vars_[FMI_STRING_IP_IDX] = value;
+    }
+    string FmiPort()
+    {
+        return string_vars_[FMI_STRING_PORT_IDX];
+    }
+    void SetFmiPort(fmi2String value)
+    {
+        string_vars_[FMI_STRING_PORT_IDX] = value;
+    }
 };
