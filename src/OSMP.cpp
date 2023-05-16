@@ -185,11 +185,7 @@ fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communica
 
         EncodePointerToInteger(send_message.data(), integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX]);
         integer_vars_[FMI_INTEGER_OSI_OUT_SIZE_IDX] = (fmi2Integer)send_message.size();
-        NormalLog("OSMP",
-                  "Providing %08X %08X, writing from %p ...",
-                  integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX],
-                  integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX],
-                  send_message.data());
+        NormalLog("OSMP", "Providing %08X %08X, writing from %p ...",integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX],integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX],send_message.data());
         swap(send_message, last_message_);
         SetFmiValid(1);
     }
@@ -200,11 +196,7 @@ fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communica
 
         EncodePointerToInteger(rec_message.data(), integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX]);
         integer_vars_[FMI_INTEGER_OSI_OUT_SIZE_IDX] = (fmi2Integer)rec_message.size();
-        NormalLog("OSMP",
-                  "Providing %08X %08X, writing from %p ...",
-                  integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX],
-                  integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX],
-                  rec_message.data());
+        NormalLog("OSMP","Providing %08X %08X, writing from %p ...",integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX],integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX],rec_message.data());
         swap(rec_message, last_message_);
         SetFmiValid(1);
     }
