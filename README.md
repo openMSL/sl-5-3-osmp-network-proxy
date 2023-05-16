@@ -5,10 +5,6 @@
 This Network Proxy FMU can receive SensorView and SensorData via TCP/IP using ZeroMQ.
 The received data is directly given to the FMU output.
 The proxy can also send SensorView oder SensorData received as FMU input via TCP/IP to a given IP address and port.
-<br><br>
-
-< Eye-catcher Image >
-<!--img src="doc/img/model_video.gif" width="800" /-->
 
 ## Parameterization
 
