@@ -72,10 +72,10 @@
 
 #undef min
 #undef max
+#include <zmq.hpp>
+
 #include "osi_sensordata.pb.h"
 #include "osi_sensorview.pb.h"
-
-#include <zmq.hpp>
 
 using namespace std;
 
@@ -118,11 +118,11 @@ class OSMP
   protected:
     /* Internal Implementation */
     fmi2Status DoInit();
-    fmi2Status DoStart(fmi2Boolean tolerance_defined, fmi2Real tolerance, fmi2Real start_time, fmi2Boolean stop_time_defined, fmi2Real stop_time);
-    fmi2Status DoEnterInitializationMode();
+    static fmi2Status DoStart(fmi2Boolean tolerance_defined, fmi2Real tolerance, fmi2Real start_time, fmi2Boolean stop_time_defined, fmi2Real stop_time);
+    static fmi2Status DoEnterInitializationMode();
     fmi2Status DoExitInitializationMode();
     fmi2Status DoCalc(fmi2Real current_communication_point, fmi2Real communication_step_size, fmi2Boolean no_set_fmu_state_prior_to_current_pointfmi_2_component);
-    fmi2Status DoTerm();
+    static fmi2Status DoTerm();
     void DoFree();
 
     /* Private File-based Logging just for Debugging */
@@ -211,9 +211,9 @@ class OSMP
     bool logging_on_;
     set<string> logging_categories_;
     fmi2CallbackFunctions functions_;
-    fmi2Boolean boolean_vars_[FMI_BOOLEAN_VARS];
-    fmi2Integer integer_vars_[FMI_INTEGER_VARS];
-    fmi2Real real_vars_[FMI_REAL_VARS];
+    fmi2Boolean boolean_vars_[FMI_BOOLEAN_VARS]{};
+    fmi2Integer integer_vars_[FMI_INTEGER_VARS]{};
+    fmi2Real real_vars_[FMI_REAL_VARS]{};
     string string_vars_[FMI_STRING_VARS];
     bool simulation_started_;
     string* current_output_buffer_;
@@ -226,55 +226,15 @@ class OSMP
     zmq::socket_t socket_ = zmq::socket_t(context_, ZMQ_PUSH);
 
     /* Simple Accessors */
-    fmi2Boolean FmiValid()
-    {
-        return boolean_vars_[FMI_BOOLEAN_VALID_IDX];
-    }
-    void SetFmiValid(fmi2Boolean value)
-    {
-        boolean_vars_[FMI_BOOLEAN_VALID_IDX] = value;
-    }
-    fmi2Boolean FmiReceiver()
-    {
-        return boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX];
-    }
-    void SetFmiReceiver(fmi2Boolean value)
-    {
-        boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX] = value;
-    }
-    fmi2Boolean FmiSender()
-    {
-        return boolean_vars_[FMI_BOOLEAN_SENDER_IDX];
-    }
-    void SetFmiSender(fmi2Boolean value)
-    {
-        boolean_vars_[FMI_BOOLEAN_SENDER_IDX] = value;
-    }
-    string FmiIp()
-    {
-        return string_vars_[FMI_STRING_IP_IDX];
-    }
-    void SetFmiIp(fmi2String value)
-    {
-        string_vars_[FMI_STRING_IP_IDX] = value;
-    }
-    string FmiPort()
-    {
-        return string_vars_[FMI_STRING_PORT_IDX];
-    }
-    void SetFmiPort(fmi2String value)
-    {
-        string_vars_[FMI_STRING_PORT_IDX] = value;
-    }
+    fmi2Boolean FmiValid() { return boolean_vars_[FMI_BOOLEAN_VALID_IDX]; }
+    void SetFmiValid(fmi2Boolean value) { boolean_vars_[FMI_BOOLEAN_VALID_IDX] = value; }
+    fmi2Boolean FmiReceiver() { return boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX]; }
+    void SetFmiReceiver(fmi2Boolean value) { boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX] = value; }
+    fmi2Boolean FmiSender() { return boolean_vars_[FMI_BOOLEAN_SENDER_IDX]; }
+    void SetFmiSender(fmi2Boolean value) { boolean_vars_[FMI_BOOLEAN_SENDER_IDX] = value; }
+    string FmiIp() { return string_vars_[FMI_STRING_IP_IDX]; }
+    void SetFmiIp(fmi2String value) { string_vars_[FMI_STRING_IP_IDX] = value; }
+    string FmiPort() { return string_vars_[FMI_STRING_PORT_IDX]; }
+    void SetFmiPort(fmi2String value) { string_vars_[FMI_STRING_PORT_IDX] = value; }
 
-    /* Protocol Buffer Accessors */
-    bool GetFmiSensorViewConfig(osi3::SensorViewConfiguration& data);
-    void SetFmiSensorViewConfigRequest(const osi3::SensorViewConfiguration& data);
-    void ResetFmiSensorViewConfigRequest();
-    bool GetFmiSensorViewIn(osi3::SensorView& data);
-    void SetFmiSensorDataOut(const osi3::SensorData& data);
-    void ResetFmiSensorDataOut();
-
-    /* Refreshing of Calculated Parameters */
-    void RefreshFmiSensorViewConfigRequest();
 };

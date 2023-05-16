@@ -129,13 +129,13 @@ fmi2Status OSMP::DoInit()
         string_var = "";
     }
 
-    //Set default values
+    // Set default values
     SetFmiSender(1);
     SetFmiReceiver(0);
     SetFmiIp("127.0.0.1");
     SetFmiPort("3456");
 
-    //todo: set default values
+    // todo: set default values
 
     return fmi2OK;
 }
@@ -155,7 +155,7 @@ fmi2Status OSMP::DoExitInitializationMode()
 
     string address = "tcp://" + FmiIp() + ":" + FmiPort();
     std::cout << address << std::endl;
-    const char * protocol = address.c_str();
+    const char* protocol = address.c_str();
     socket_.bind(protocol);
 
     return fmi2OK;
@@ -164,7 +164,7 @@ fmi2Status OSMP::DoExitInitializationMode()
 fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communication_step_size, fmi2Boolean no_set_fmu_state_prior_to_current_pointfmi_2_component)
 {
 
-    void* buffer = DecodeIntegerToPointer(integer_vars_[FMI_INTEGER_OSI_IN_BASEHI_IDX],integer_vars_[FMI_INTEGER_OSI_IN_BASELO_IDX]);
+    void* buffer = DecodeIntegerToPointer(integer_vars_[FMI_INTEGER_OSI_IN_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_IN_BASELO_IDX]);
     int buffer_size = integer_vars_[FMI_INTEGER_OSI_IN_SIZE_IDX];
 
     if (FmiSender() != 0)
@@ -390,7 +390,6 @@ fmi2Status OSMP::GetReal(const fmi2ValueReference vr[], size_t nvr, fmi2Real val
 fmi2Status OSMP::GetInteger(const fmi2ValueReference vr[], size_t nvr, fmi2Integer value[])
 {
     FmiVerboseLog("fmi2GetInteger(...)");
-    bool need_refresh = !simulation_started_;
     for (size_t i = 0; i < nvr; i++)
     {
         if (vr[i] < FMI_INTEGER_VARS)
