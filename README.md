@@ -12,14 +12,16 @@ The proxy can also send SensorView oder SensorData received as FMU input via TCP
 
 ## Parameterization
 
-The following FMI parameters can be set:
+The following FMI parameters can be set.
+Either `sender` or `receiver` have to be set to _true_.
+Otherwise, the FMU will return with an error.
 
-| Type    | Parameter  | Description                                |
-|---------|------------|--------------------------------------------|
-| Boolean | `sender`   | Set if Proxy shall send data via TCP/IP    |
-| Boolean | `receiver` | Set if Proxy shall receive data via TCP/IP |
-| String  | `ip`       | IP address of TCP connection               |
-| String  | `port`     | Port of TCP connection                     |
+| Type    | Parameter  | Default     | Description                                |
+|---------|------------|-------------|--------------------------------------------|
+| Boolean | `sender`   | _true_      | Set if Proxy shall send data via TCP/IP    |
+| Boolean | `receiver` | _false_     | Set if Proxy shall receive data via TCP/IP |
+| String  | `ip`       | _127.0.0.1_ | IP address of TCP connection               |
+| String  | `port`     | _3456_      | Port of TCP connection                     |
 
 ## Interface
 
