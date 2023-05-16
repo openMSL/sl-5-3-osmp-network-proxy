@@ -215,15 +215,11 @@ class OSMP
     fmi2Integer integer_vars_[FMI_INTEGER_VARS]{};
     fmi2Real real_vars_[FMI_REAL_VARS]{};
     string string_vars_[FMI_STRING_VARS];
-    bool simulation_started_;
-    string* current_output_buffer_;
-    string* last_output_buffer_;
-    string* current_config_request_buffer_;
-    string* last_config_request_buffer_;
+    zmq::message_t last_message_;
 
     //  Prepare our context and socket
     zmq::context_t context_;
-    zmq::socket_t socket_ = zmq::socket_t(context_, ZMQ_PUSH);
+    zmq::socket_t socket_;
 
     /* Simple Accessors */
     fmi2Boolean FmiValid()

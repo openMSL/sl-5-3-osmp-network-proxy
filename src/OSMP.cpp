@@ -156,13 +156,24 @@ fmi2Status OSMP::DoExitInitializationMode()
     string address = "tcp://" + FmiIp() + ":" + FmiPort();
     std::cout << address << std::endl;
     const char* protocol = address.c_str();
-    socket_.bind(protocol);
-
+    if (FmiSender() != 0)
+    {
+        socket_ = zmq::socket_t(context_, ZMQ_PUSH);
+        socket_.bind(protocol);
+        std::cout << "push" << std::endl;
+    }
+    else
+    {
+        socket_ = zmq::socket_t(context_, ZMQ_PULL);
+        socket_.connect(protocol);
+        std::cout << "pull" << std::endl;
+    }
     return fmi2OK;
 }
 
 fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communication_step_size, fmi2Boolean no_set_fmu_state_prior_to_current_pointfmi_2_component)
 {
+    fmi2Status output_status = fmi2OK;
 
     void* buffer = DecodeIntegerToPointer(integer_vars_[FMI_INTEGER_OSI_IN_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_IN_BASELO_IDX]);
     int buffer_size = integer_vars_[FMI_INTEGER_OSI_IN_SIZE_IDX];
@@ -172,38 +183,37 @@ fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communica
         zmq::message_t send_message(buffer, buffer_size, nullptr);
         socket_.send(send_message, zmq::send_flags::none);
 
-        current_output_buffer_ = static_cast<string*>(buffer);
-        EncodePointerToInteger(current_output_buffer_->data(), integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX]);
-        integer_vars_[FMI_INTEGER_OSI_OUT_SIZE_IDX] = (fmi2Integer)current_output_buffer_->length();
+        EncodePointerToInteger(send_message.data(), integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX]);
+        integer_vars_[FMI_INTEGER_OSI_OUT_SIZE_IDX] = (fmi2Integer)send_message.size();
         NormalLog("OSMP",
                   "Providing %08X %08X, writing from %p ...",
                   integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX],
                   integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX],
-                  current_output_buffer_->data());
-        swap(current_output_buffer_, last_output_buffer_);
+                  send_message.data());
+        swap(send_message, last_message_);
         SetFmiValid(1);
     }
-
-    if (FmiReceiver() != 0)
+    else if (FmiReceiver() != 0)
     {
         zmq::message_t rec_message;
         socket_.recv(rec_message, zmq::recv_flags::none);
 
-        string tmp_buffer = rec_message.to_string();
-        current_output_buffer_ = &tmp_buffer;
-
-        EncodePointerToInteger(current_output_buffer_->data(), integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX]);
-        integer_vars_[FMI_INTEGER_OSI_OUT_SIZE_IDX] = (fmi2Integer)current_output_buffer_->length();
+        EncodePointerToInteger(rec_message.data(), integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX]);
+        integer_vars_[FMI_INTEGER_OSI_OUT_SIZE_IDX] = (fmi2Integer)rec_message.size();
         NormalLog("OSMP",
                   "Providing %08X %08X, writing from %p ...",
                   integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX],
                   integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX],
-                  current_output_buffer_->data());
-        swap(current_output_buffer_, last_output_buffer_);
+                  rec_message.data());
+        swap(rec_message, last_message_);
         SetFmiValid(1);
     }
-
-    return fmi2OK;
+    else
+    {
+        NormalLog("OSMP", "Either sender or receiver has to be set to true.");
+        output_status = fmi2Error;
+    }
+    return output_status;
 }
 
 fmi2Status OSMP::DoTerm()
@@ -230,12 +240,7 @@ OSMP::OSMP(fmi2String theinstance_name,
       fmu_resource_location_(thefmu_resource_location),
       functions_(*thefunctions),
       visible_(thevisible != 0),
-      logging_on_(thelogging_on != 0),
-      simulation_started_(false),
-      current_output_buffer_(new string()),
-      last_output_buffer_(new string()),
-      current_config_request_buffer_(new string()),
-      last_config_request_buffer_(new string())
+      logging_on_(thelogging_on != 0)
 {
     logging_categories_.clear();
     logging_categories_.insert("FMI");
@@ -339,7 +344,6 @@ fmi2Status OSMP::EnterInitializationMode()
 fmi2Status OSMP::ExitInitializationMode()
 {
     FmiVerboseLog("fmi2ExitInitializationMode()");
-    simulation_started_ = true;
     return DoExitInitializationMode();
 }
 
@@ -360,7 +364,6 @@ fmi2Status OSMP::Reset()
     FmiVerboseLog("fmi2Reset()");
 
     DoFree();
-    simulation_started_ = false;
     return DoInit();
 }
 
