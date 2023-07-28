@@ -204,7 +204,6 @@ fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communica
             NormalLog("OSMP", "Sender time out: No receiver with given IP and port found.");
             output_status = fmi2Error;
         }
-
     }
     else if (FmiReceiver() != 0)
     {

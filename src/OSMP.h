@@ -7,10 +7,10 @@
 #pragma once
 
 #ifndef FMU_SHARED_OBJECT
-#define FMI2_FUNCTION_PREFIX osmp-network-proxy_
+#define FMI2_FUNCTION_PREFIX osmp - network - proxy_
 #endif
-#include "fmi2Functions.h"
 #include "OSMPConfig.h"
+#include "fmi2Functions.h"
 
 /*
  * Logging Control
@@ -166,7 +166,8 @@ class OSMP
         vsnprintf(buffer, 1024, format, arg);
 #endif
 #ifdef PRIVATE_LOG_PATH
-        if (!private_log_file.is_open()) {
+        if (!private_log_file.is_open())
+        {
             private_log_file.open(PRIVATE_LOG_PATH, ios::out | ios::app);
         }
         if (private_log_file.is_open())
@@ -226,44 +227,14 @@ class OSMP
     zmq::socket_t socket_;
 
     /* Simple Accessors */
-    fmi2Boolean FmiValid()
-    {
-        return boolean_vars_[FMI_BOOLEAN_VALID_IDX];
-    }
-    void SetFmiValid(fmi2Boolean value)
-    {
-        boolean_vars_[FMI_BOOLEAN_VALID_IDX] = value;
-    }
-    fmi2Boolean FmiReceiver()
-    {
-        return boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX];
-    }
-    void SetFmiReceiver(fmi2Boolean value)
-    {
-        boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX] = value;
-    }
-    fmi2Boolean FmiSender()
-    {
-        return boolean_vars_[FMI_BOOLEAN_SENDER_IDX];
-    }
-    void SetFmiSender(fmi2Boolean value)
-    {
-        boolean_vars_[FMI_BOOLEAN_SENDER_IDX] = value;
-    }
-    string FmiIp()
-    {
-        return string_vars_[FMI_STRING_IP_IDX];
-    }
-    void SetFmiIp(fmi2String value)
-    {
-        string_vars_[FMI_STRING_IP_IDX] = value;
-    }
-    string FmiPort()
-    {
-        return string_vars_[FMI_STRING_PORT_IDX];
-    }
-    void SetFmiPort(fmi2String value)
-    {
-        string_vars_[FMI_STRING_PORT_IDX] = value;
-    }
+    fmi2Boolean FmiValid() { return boolean_vars_[FMI_BOOLEAN_VALID_IDX]; }
+    void SetFmiValid(fmi2Boolean value) { boolean_vars_[FMI_BOOLEAN_VALID_IDX] = value; }
+    fmi2Boolean FmiReceiver() { return boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX]; }
+    void SetFmiReceiver(fmi2Boolean value) { boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX] = value; }
+    fmi2Boolean FmiSender() { return boolean_vars_[FMI_BOOLEAN_SENDER_IDX]; }
+    void SetFmiSender(fmi2Boolean value) { boolean_vars_[FMI_BOOLEAN_SENDER_IDX] = value; }
+    string FmiIp() { return string_vars_[FMI_STRING_IP_IDX]; }
+    void SetFmiIp(fmi2String value) { string_vars_[FMI_STRING_IP_IDX] = value; }
+    string FmiPort() { return string_vars_[FMI_STRING_PORT_IDX]; }
+    void SetFmiPort(fmi2String value) { string_vars_[FMI_STRING_PORT_IDX] = value; }
 };
