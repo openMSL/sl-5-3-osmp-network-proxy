@@ -46,7 +46,7 @@
 using namespace std;
 
 #ifdef PRIVATE_LOG_PATH
-ofstream COSMPDummySensor::private_log_file;
+ofstream OSMP::private_log_file;
 #endif
 
 /*
@@ -159,16 +159,29 @@ fmi2Status OSMP::DoExitInitializationMode()
     if (FmiSender() != 0)
     {
         socket_ = zmq::socket_t(context_, ZMQ_PUSH);
+        const int wait_time_ms = 5000;
+        zmq_setsockopt(socket_, ZMQ_SNDTIMEO, &wait_time_ms, sizeof(wait_time_ms));
         socket_.bind(protocol);
         std::cout << "push" << std::endl;
     }
     else
     {
         socket_ = zmq::socket_t(context_, ZMQ_PULL);
+        const int wait_time_ms = 5000;
+        zmq_setsockopt(socket_, ZMQ_RCVTIMEO, &wait_time_ms, sizeof(wait_time_ms));
         socket_.connect(protocol);
         std::cout << "pull" << std::endl;
     }
     return fmi2OK;
+}
+
+void OSMP::ProcessMessage(zmq::message_t& message)
+{
+    EncodePointerToInteger(message.data(), integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX]);
+    integer_vars_[FMI_INTEGER_OSI_OUT_SIZE_IDX] = (fmi2Integer)message.size();
+    NormalLog("OSMP", "Providing %08X %08X, writing from %p ...", integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX], message.data());
+    swap(message, last_message_);
+    SetFmiValid(1);
 }
 
 fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communication_step_size, fmi2Boolean no_set_fmu_state_prior_to_current_pointfmi_2_component)
@@ -181,24 +194,30 @@ fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communica
     if (FmiSender() != 0)
     {
         zmq::message_t send_message(buffer, buffer_size, nullptr);
-        socket_.send(send_message, zmq::send_flags::none);
-
-        EncodePointerToInteger(send_message.data(), integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX]);
-        integer_vars_[FMI_INTEGER_OSI_OUT_SIZE_IDX] = (fmi2Integer)send_message.size();
-        NormalLog("OSMP", "Providing %08X %08X, writing from %p ...", integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX], send_message.data());
-        swap(send_message, last_message_);
-        SetFmiValid(1);
+        auto success = socket_.send(send_message, zmq::send_flags::none);
+        if (success.has_value())
+        {
+            ProcessMessage(send_message);
+        }
+        else
+        {
+            NormalLog("OSMP", "Sender time out: No receiver with given IP and port found.");
+            output_status = fmi2Error;
+        }
     }
     else if (FmiReceiver() != 0)
     {
         zmq::message_t rec_message;
-        socket_.recv(rec_message, zmq::recv_flags::none);
-
-        EncodePointerToInteger(rec_message.data(), integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX]);
-        integer_vars_[FMI_INTEGER_OSI_OUT_SIZE_IDX] = (fmi2Integer)rec_message.size();
-        NormalLog("OSMP", "Providing %08X %08X, writing from %p ...", integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX], rec_message.data());
-        swap(rec_message, last_message_);
-        SetFmiValid(1);
+        auto success = socket_.recv(rec_message, zmq::recv_flags::none);
+        if (success.has_value())
+        {
+            ProcessMessage(rec_message);
+        }
+        else
+        {
+            NormalLog("OSMP", "Receiver time out: No sender with given IP and port found.");
+            output_status = fmi2Error;
+        }
     }
     else
     {

@@ -7,8 +7,9 @@
 #pragma once
 
 #ifndef FMU_SHARED_OBJECT
-#define FMI2_FUNCTION_PREFIX OSMPDummySensor_
+#define FMI2_FUNCTION_PREFIX osmp - network - proxy_
 #endif
+#include "OSMPConfig.h"
 #include "fmi2Functions.h"
 
 /*
@@ -124,6 +125,7 @@ class OSMP
     fmi2Status DoCalc(fmi2Real current_communication_point, fmi2Real communication_step_size, fmi2Boolean no_set_fmu_state_prior_to_current_pointfmi_2_component);
     static fmi2Status DoTerm();
     void DoFree();
+    void ProcessMessage(zmq::message_t& message);
 
     /* Private File-based Logging just for Debugging */
 #ifdef PRIVATE_LOG_PATH
@@ -146,7 +148,7 @@ class OSMP
 #else
             vsnprintf(buffer, 1024, format, ap);
 #endif
-            private_log_file << "OSMPDummySensor"
+            private_log_file << "osmp-network-proxy"
                              << "::Global:FMI: " << buffer << endl;
             private_log_file.flush();
         }
@@ -165,17 +167,20 @@ class OSMP
 #endif
 #ifdef PRIVATE_LOG_PATH
         if (!private_log_file.is_open())
+        {
             private_log_file.open(PRIVATE_LOG_PATH, ios::out | ios::app);
+        }
         if (private_log_file.is_open())
         {
-            private_log_file << "OSMPDummySensor"
-                             << "::" << instanceName << "<" << ((void*)this) << ">:" << category << ": " << buffer << endl;
+            private_log_file << instance_name_ << "<" << ((void*)this) << ">:" << category << ": " << buffer << endl;
             private_log_file.flush();
         }
 #endif
 #ifdef PUBLIC_LOGGING
-        if (loggingOn && loggingCategories.count(category))
-            functions.logger(functions.componentEnvironment, instanceName.c_str(), fmi2OK, category, buffer);
+        if (logging_on_ && (logging_categories_.count(category) != 0u))
+        {
+            functions_.logger(functions_.componentEnvironment, instance_name_.c_str(), fmi2OK, category, buffer);
+        }
 #endif
 #endif
     }
@@ -196,7 +201,7 @@ class OSMP
 #if defined(PRIVATE_LOG_PATH) || defined(PUBLIC_LOGGING)
         va_list ap;
         va_start(ap, format);
-        internal_log(category, format, ap);
+        InternalLog(category, format, ap);
         va_end(ap);
 #endif
     }
@@ -222,44 +227,14 @@ class OSMP
     zmq::socket_t socket_;
 
     /* Simple Accessors */
-    fmi2Boolean FmiValid()
-    {
-        return boolean_vars_[FMI_BOOLEAN_VALID_IDX];
-    }
-    void SetFmiValid(fmi2Boolean value)
-    {
-        boolean_vars_[FMI_BOOLEAN_VALID_IDX] = value;
-    }
-    fmi2Boolean FmiReceiver()
-    {
-        return boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX];
-    }
-    void SetFmiReceiver(fmi2Boolean value)
-    {
-        boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX] = value;
-    }
-    fmi2Boolean FmiSender()
-    {
-        return boolean_vars_[FMI_BOOLEAN_SENDER_IDX];
-    }
-    void SetFmiSender(fmi2Boolean value)
-    {
-        boolean_vars_[FMI_BOOLEAN_SENDER_IDX] = value;
-    }
-    string FmiIp()
-    {
-        return string_vars_[FMI_STRING_IP_IDX];
-    }
-    void SetFmiIp(fmi2String value)
-    {
-        string_vars_[FMI_STRING_IP_IDX] = value;
-    }
-    string FmiPort()
-    {
-        return string_vars_[FMI_STRING_PORT_IDX];
-    }
-    void SetFmiPort(fmi2String value)
-    {
-        string_vars_[FMI_STRING_PORT_IDX] = value;
-    }
+    fmi2Boolean FmiValid() { return boolean_vars_[FMI_BOOLEAN_VALID_IDX]; }
+    void SetFmiValid(fmi2Boolean value) { boolean_vars_[FMI_BOOLEAN_VALID_IDX] = value; }
+    fmi2Boolean FmiReceiver() { return boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX]; }
+    void SetFmiReceiver(fmi2Boolean value) { boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX] = value; }
+    fmi2Boolean FmiSender() { return boolean_vars_[FMI_BOOLEAN_SENDER_IDX]; }
+    void SetFmiSender(fmi2Boolean value) { boolean_vars_[FMI_BOOLEAN_SENDER_IDX] = value; }
+    string FmiIp() { return string_vars_[FMI_STRING_IP_IDX]; }
+    void SetFmiIp(fmi2String value) { string_vars_[FMI_STRING_IP_IDX] = value; }
+    string FmiPort() { return string_vars_[FMI_STRING_PORT_IDX]; }
+    void SetFmiPort(fmi2String value) { string_vars_[FMI_STRING_PORT_IDX] = value; }
 };
