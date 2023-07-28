@@ -159,12 +159,16 @@ fmi2Status OSMP::DoExitInitializationMode()
     if (FmiSender() != 0)
     {
         socket_ = zmq::socket_t(context_, ZMQ_PUSH);
+        const int wait_time_ms = 5000;
+        zmq_setsockopt(socket_, ZMQ_SNDTIMEO, &wait_time_ms, sizeof(wait_time_ms));
         socket_.bind(protocol);
         std::cout << "push" << std::endl;
     }
     else
     {
         socket_ = zmq::socket_t(context_, ZMQ_PULL);
+        const int wait_time_ms = 5000;
+        zmq_setsockopt(socket_, ZMQ_RCVTIMEO, &wait_time_ms, sizeof(wait_time_ms));
         socket_.connect(protocol);
         std::cout << "pull" << std::endl;
     }
@@ -190,14 +194,14 @@ fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communica
     if (FmiSender() != 0)
     {
         zmq::message_t send_message(buffer, buffer_size, nullptr);
-        zmq::detail::trivial_optional<size_t> success = socket_.send(send_message, zmq::send_flags::dontwait);
+        auto success = socket_.send(send_message, zmq::send_flags::none);
         if (success.has_value())
         {
             ProcessMessage(send_message);
         }
         else
         {
-            NormalLog("OSMP", "No receiver with given IP and port found.");
+            NormalLog("OSMP", "Sender time out: No receiver with given IP and port found.");
             output_status = fmi2Error;
         }
 
@@ -205,8 +209,16 @@ fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communica
     else if (FmiReceiver() != 0)
     {
         zmq::message_t rec_message;
-        socket_.recv(rec_message, zmq::recv_flags::none);
-        ProcessMessage(rec_message);
+        auto success = socket_.recv(rec_message, zmq::recv_flags::none);
+        if (success.has_value())
+        {
+            ProcessMessage(rec_message);
+        }
+        else
+        {
+            NormalLog("OSMP", "Receiver time out: No sender with given IP and port found.");
+            output_status = fmi2Error;
+        }
     }
     else
     {
