@@ -124,6 +124,7 @@ class OSMP
     fmi2Status DoCalc(fmi2Real current_communication_point, fmi2Real communication_step_size, fmi2Boolean no_set_fmu_state_prior_to_current_pointfmi_2_component);
     static fmi2Status DoTerm();
     void DoFree();
+    void ProcessMessage(zmq::message_t& message);
 
     /* Private File-based Logging just for Debugging */
 #ifdef PRIVATE_LOG_PATH

@@ -171,6 +171,15 @@ fmi2Status OSMP::DoExitInitializationMode()
     return fmi2OK;
 }
 
+void OSMP::ProcessMessage(zmq::message_t& message)
+{
+    EncodePointerToInteger(message.data(), integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX]);
+    integer_vars_[FMI_INTEGER_OSI_OUT_SIZE_IDX] = (fmi2Integer)message.size();
+    NormalLog("OSMP", "Providing %08X %08X, writing from %p ...", integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX], message.data());
+    swap(message, last_message_);
+    SetFmiValid(1);
+}
+
 fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communication_step_size, fmi2Boolean no_set_fmu_state_prior_to_current_pointfmi_2_component)
 {
     fmi2Status output_status = fmi2OK;
@@ -181,24 +190,13 @@ fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communica
     if (FmiSender() != 0)
     {
         zmq::message_t send_message(buffer, buffer_size, nullptr);
-        socket_.send(send_message, zmq::send_flags::none);
-
-        EncodePointerToInteger(send_message.data(), integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX]);
-        integer_vars_[FMI_INTEGER_OSI_OUT_SIZE_IDX] = (fmi2Integer)send_message.size();
-        NormalLog("OSMP", "Providing %08X %08X, writing from %p ...", integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX], send_message.data());
-        swap(send_message, last_message_);
-        SetFmiValid(1);
+        ProcessMessage(send_message);
     }
     else if (FmiReceiver() != 0)
     {
         zmq::message_t rec_message;
         socket_.recv(rec_message, zmq::recv_flags::none);
-
-        EncodePointerToInteger(rec_message.data(), integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX]);
-        integer_vars_[FMI_INTEGER_OSI_OUT_SIZE_IDX] = (fmi2Integer)rec_message.size();
-        NormalLog("OSMP", "Providing %08X %08X, writing from %p ...", integer_vars_[FMI_INTEGER_OSI_OUT_BASEHI_IDX], integer_vars_[FMI_INTEGER_OSI_OUT_BASELO_IDX], rec_message.data());
-        swap(rec_message, last_message_);
-        SetFmiValid(1);
+        ProcessMessage(rec_message);
     }
     else
     {
