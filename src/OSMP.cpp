@@ -46,7 +46,7 @@
 using namespace std;
 
 #ifdef PRIVATE_LOG_PATH
-ofstream COSMPDummySensor::private_log_file;
+ofstream OSMP::private_log_file;
 #endif
 
 /*
@@ -190,7 +190,17 @@ fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communica
     if (FmiSender() != 0)
     {
         zmq::message_t send_message(buffer, buffer_size, nullptr);
-        ProcessMessage(send_message);
+        zmq::detail::trivial_optional<size_t> success = socket_.send(send_message, zmq::send_flags::dontwait);
+        if (success.has_value())
+        {
+            ProcessMessage(send_message);
+        }
+        else
+        {
+            NormalLog("OSMP", "No receiver with given IP and port found.");
+            output_status = fmi2Error;
+        }
+
     }
     else if (FmiReceiver() != 0)
     {

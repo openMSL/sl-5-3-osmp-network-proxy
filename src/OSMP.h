@@ -7,9 +7,10 @@
 #pragma once
 
 #ifndef FMU_SHARED_OBJECT
-#define FMI2_FUNCTION_PREFIX OSMPDummySensor_
+#define FMI2_FUNCTION_PREFIX osmp-network-proxy_
 #endif
 #include "fmi2Functions.h"
+#include "OSMPConfig.h"
 
 /*
  * Logging Control
@@ -147,7 +148,7 @@ class OSMP
 #else
             vsnprintf(buffer, 1024, format, ap);
 #endif
-            private_log_file << "OSMPDummySensor"
+            private_log_file << "osmp-network-proxy"
                              << "::Global:FMI: " << buffer << endl;
             private_log_file.flush();
         }
@@ -165,18 +166,20 @@ class OSMP
         vsnprintf(buffer, 1024, format, arg);
 #endif
 #ifdef PRIVATE_LOG_PATH
-        if (!private_log_file.is_open())
+        if (!private_log_file.is_open()) {
             private_log_file.open(PRIVATE_LOG_PATH, ios::out | ios::app);
+        }
         if (private_log_file.is_open())
         {
-            private_log_file << "OSMPDummySensor"
-                             << "::" << instanceName << "<" << ((void*)this) << ">:" << category << ": " << buffer << endl;
+            private_log_file << instance_name_ << "<" << ((void*)this) << ">:" << category << ": " << buffer << endl;
             private_log_file.flush();
         }
 #endif
 #ifdef PUBLIC_LOGGING
-        if (loggingOn && loggingCategories.count(category))
-            functions.logger(functions.componentEnvironment, instanceName.c_str(), fmi2OK, category, buffer);
+        if (logging_on_ && (logging_categories_.count(category) != 0u))
+        {
+            functions_.logger(functions_.componentEnvironment, instance_name_.c_str(), fmi2OK, category, buffer);
+        }
 #endif
 #endif
     }
@@ -197,7 +200,7 @@ class OSMP
 #if defined(PRIVATE_LOG_PATH) || defined(PUBLIC_LOGGING)
         va_list ap;
         va_start(ap, format);
-        internal_log(category, format, ap);
+        InternalLog(category, format, ap);
         va_end(ap);
 #endif
     }
