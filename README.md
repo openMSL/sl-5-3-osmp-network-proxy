@@ -30,7 +30,7 @@ The Proxy can receive SensorView or SensorData as input.
 1. Clone this repository **with submodules**:
 
     ```bash
-    git clone https://github.com/Persival-GmbH/osmp-network-proxy.git --recurse-submodules
+    git clone https://github.com/openMSL/sl-5-3-osmp-network-proxy.git --recurse-submodules
     ```
 
 2. Install dependencies:
