@@ -1,4 +1,4 @@
-# OSMP Network Proxy
+# SL-5-3 OSMP Network Proxy
 
 ![Credibility Assessment](../../actions/workflows/credibility_assessment.yml/badge.svg)
 
