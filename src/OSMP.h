@@ -1,6 +1,7 @@
 //
 // Copyright 2016 -- 2018 PMSF IT Consulting Pierre R. Mai
 // Copyright 2023 BMW AG
+// Copyright 2023 Persival GmbH
 // SPDX-License-Identifier: MPL-2.0
 //
 
