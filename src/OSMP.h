@@ -178,7 +178,7 @@ class OSMP
         }
 #endif
 #ifdef PUBLIC_LOGGING
-        if (logging_on_ && (logging_categories_.count(category) != 0u))
+        if (logging_on_ && (logging_categories_.count(category) != 0U))
         {
             functions_.logger(functions_.componentEnvironment, instance_name_.c_str(), fmi2OK, category, buffer);
         }

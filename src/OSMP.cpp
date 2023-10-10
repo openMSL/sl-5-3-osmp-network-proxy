@@ -158,11 +158,11 @@ fmi2Status OSMP::DoExitInitializationMode()
 
     if (FmiSender() != 0)
     {
-        if (FmiPushPull()) // Push/Pull configuration
+        if (FmiPushPull() != 0)  // Push/Pull configuration
         {
             socket_ = zmq::socket_t(context_, ZMQ_PUSH);
         }
-        else    // Server/Client configuration
+        else  // Server/Client configuration
         {
             socket_ = zmq::socket_t(context_, ZMQ_REP);
         }
@@ -172,11 +172,11 @@ fmi2Status OSMP::DoExitInitializationMode()
     }
     else
     {
-        if (FmiPushPull()) // Push/Pull configuration
+        if (FmiPushPull() != 0)  // Push/Pull configuration
         {
             socket_ = zmq::socket_t(context_, ZMQ_PULL);
         }
-        else    // Server/Client configuration
+        else  // Server/Client configuration
         {
             socket_ = zmq::socket_t(context_, ZMQ_REQ);
         }
@@ -206,7 +206,7 @@ fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communica
 
     if (FmiSender() != 0)
     {
-        if (!FmiPushPull()) // Server/Client configuration
+        if (FmiPushPull() == 0)  // Server/Client configuration
         {
             zmq::message_t request_message;
             socket_.recv(request_message, zmq::recv_flags::none);
@@ -225,7 +225,7 @@ fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communica
     }
     else if (FmiReceiver() != 0)
     {
-        if (!FmiPushPull()) // Server/Client configuration
+        if (FmiPushPull() == 0)  // Server/Client configuration
         {
             std::stringstream s;
             s << "ready";
