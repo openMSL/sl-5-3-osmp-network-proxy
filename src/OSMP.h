@@ -42,7 +42,8 @@
 #define FMI_BOOLEAN_VALID_IDX 0
 #define FMI_BOOLEAN_SENDER_IDX 1
 #define FMI_BOOLEAN_RECEIVER_IDX 2
-#define FMI_BOOLEAN_LAST_IDX FMI_BOOLEAN_RECEIVER_IDX
+#define FMI_BOOLEAN_PUSHPULL_IDX 3
+#define FMI_BOOLEAN_LAST_IDX FMI_BOOLEAN_PUSHPULL_IDX
 #define FMI_BOOLEAN_VARS (FMI_BOOLEAN_LAST_IDX + 1)
 
 /* Integer Variables */
@@ -233,6 +234,8 @@ class OSMP
     void SetFmiReceiver(fmi2Boolean value) { boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX] = value; }
     fmi2Boolean FmiSender() { return boolean_vars_[FMI_BOOLEAN_SENDER_IDX]; }
     void SetFmiSender(fmi2Boolean value) { boolean_vars_[FMI_BOOLEAN_SENDER_IDX] = value; }
+    fmi2Boolean FmiPushPull() { return boolean_vars_[FMI_BOOLEAN_PUSHPULL_IDX]; }
+    void SetFmiPushPull(fmi2Boolean value) { boolean_vars_[FMI_BOOLEAN_PUSHPULL_IDX] = value; }
     string FmiIp() { return string_vars_[FMI_STRING_IP_IDX]; }
     void SetFmiIp(fmi2String value) { string_vars_[FMI_STRING_IP_IDX] = value; }
     string FmiPort() { return string_vars_[FMI_STRING_PORT_IDX]; }
