@@ -1,6 +1,7 @@
 //
 // Copyright 2016 -- 2018 PMSF IT Consulting Pierre R. Mai
 // Copyright 2023 BMW AG
+// Copyright 2023 Persival GmbH
 // SPDX-License-Identifier: MPL-2.0
 //
 
@@ -132,10 +133,9 @@ fmi2Status OSMP::DoInit()
     // Set default values
     SetFmiSender(1);
     SetFmiReceiver(0);
+    SetFmiPushPull(1);
     SetFmiIp("127.0.0.1");
     SetFmiPort("3456");
-
-    // todo: set default values
 
     return fmi2OK;
 }
@@ -156,22 +156,36 @@ fmi2Status OSMP::DoExitInitializationMode()
     string address = "tcp://" + FmiIp() + ":" + FmiPort();
     std::cout << address << std::endl;
     const char* protocol = address.c_str();
+
     if (FmiSender() != 0)
     {
-        socket_ = zmq::socket_t(context_, ZMQ_PUSH);
+        if (FmiPushPull() != 0)  // Push/Pull configuration
+        {
+            socket_ = zmq::socket_t(context_, ZMQ_PUSH);
+        }
+        else  // Server/Client configuration
+        {
+            socket_ = zmq::socket_t(context_, ZMQ_REP);
+        }
         const int wait_time_ms = 5000;
         zmq_setsockopt(socket_, ZMQ_SNDTIMEO, &wait_time_ms, sizeof(wait_time_ms));
         socket_.bind(protocol);
-        std::cout << "push" << std::endl;
     }
     else
     {
-        socket_ = zmq::socket_t(context_, ZMQ_PULL);
+        if (FmiPushPull() != 0)  // Push/Pull configuration
+        {
+            socket_ = zmq::socket_t(context_, ZMQ_PULL);
+        }
+        else  // Server/Client configuration
+        {
+            socket_ = zmq::socket_t(context_, ZMQ_REQ);
+        }
         const int wait_time_ms = 5000;
         zmq_setsockopt(socket_, ZMQ_RCVTIMEO, &wait_time_ms, sizeof(wait_time_ms));
         socket_.connect(protocol);
-        std::cout << "pull" << std::endl;
     }
+
     return fmi2OK;
 }
 
@@ -193,6 +207,11 @@ fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communica
 
     if (FmiSender() != 0)
     {
+        if (FmiPushPull() == 0)  // Server/Client configuration
+        {
+            zmq::message_t request_message;
+            socket_.recv(request_message, zmq::recv_flags::none);
+        }
         zmq::message_t send_message(buffer, buffer_size, nullptr);
         auto success = socket_.send(send_message, zmq::send_flags::none);
         if (success.has_value())
@@ -207,6 +226,13 @@ fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communica
     }
     else if (FmiReceiver() != 0)
     {
+        if (FmiPushPull() == 0)  // Server/Client configuration
+        {
+            std::stringstream s;
+            s << "ready";
+            zmq::message_t send_message(s.str().data(), s.str().size());
+            socket_.send(send_message, zmq::send_flags::none);
+        }
         zmq::message_t rec_message;
         auto success = socket_.recv(rec_message, zmq::recv_flags::none);
         if (success.has_value())
@@ -224,6 +250,7 @@ fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communica
         NormalLog("OSMP", "Either sender or receiver has to be set to true.");
         output_status = fmi2Error;
     }
+
     return output_status;
 }
 

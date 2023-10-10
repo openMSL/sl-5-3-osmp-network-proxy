@@ -1,6 +1,7 @@
 //
 // Copyright 2016 -- 2018 PMSF IT Consulting Pierre R. Mai
 // Copyright 2023 BMW AG
+// Copyright 2023 Persival GmbH
 // SPDX-License-Identifier: MPL-2.0
 //
 
@@ -42,7 +43,8 @@
 #define FMI_BOOLEAN_VALID_IDX 0
 #define FMI_BOOLEAN_SENDER_IDX 1
 #define FMI_BOOLEAN_RECEIVER_IDX 2
-#define FMI_BOOLEAN_LAST_IDX FMI_BOOLEAN_RECEIVER_IDX
+#define FMI_BOOLEAN_PUSHPULL_IDX 3
+#define FMI_BOOLEAN_LAST_IDX FMI_BOOLEAN_PUSHPULL_IDX
 #define FMI_BOOLEAN_VARS (FMI_BOOLEAN_LAST_IDX + 1)
 
 /* Integer Variables */
@@ -177,7 +179,7 @@ class OSMP
         }
 #endif
 #ifdef PUBLIC_LOGGING
-        if (logging_on_ && (logging_categories_.count(category) != 0u))
+        if (logging_on_ && (logging_categories_.count(category) != 0U))
         {
             functions_.logger(functions_.componentEnvironment, instance_name_.c_str(), fmi2OK, category, buffer);
         }
@@ -227,14 +229,52 @@ class OSMP
     zmq::socket_t socket_;
 
     /* Simple Accessors */
-    fmi2Boolean FmiValid() { return boolean_vars_[FMI_BOOLEAN_VALID_IDX]; }
-    void SetFmiValid(fmi2Boolean value) { boolean_vars_[FMI_BOOLEAN_VALID_IDX] = value; }
-    fmi2Boolean FmiReceiver() { return boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX]; }
-    void SetFmiReceiver(fmi2Boolean value) { boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX] = value; }
-    fmi2Boolean FmiSender() { return boolean_vars_[FMI_BOOLEAN_SENDER_IDX]; }
-    void SetFmiSender(fmi2Boolean value) { boolean_vars_[FMI_BOOLEAN_SENDER_IDX] = value; }
-    string FmiIp() { return string_vars_[FMI_STRING_IP_IDX]; }
-    void SetFmiIp(fmi2String value) { string_vars_[FMI_STRING_IP_IDX] = value; }
-    string FmiPort() { return string_vars_[FMI_STRING_PORT_IDX]; }
-    void SetFmiPort(fmi2String value) { string_vars_[FMI_STRING_PORT_IDX] = value; }
+    fmi2Boolean FmiValid()
+    {
+        return boolean_vars_[FMI_BOOLEAN_VALID_IDX];
+    }
+    void SetFmiValid(fmi2Boolean value)
+    {
+        boolean_vars_[FMI_BOOLEAN_VALID_IDX] = value;
+    }
+    fmi2Boolean FmiReceiver()
+    {
+        return boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX];
+    }
+    void SetFmiReceiver(fmi2Boolean value)
+    {
+        boolean_vars_[FMI_BOOLEAN_RECEIVER_IDX] = value;
+    }
+    fmi2Boolean FmiSender()
+    {
+        return boolean_vars_[FMI_BOOLEAN_SENDER_IDX];
+    }
+    void SetFmiSender(fmi2Boolean value)
+    {
+        boolean_vars_[FMI_BOOLEAN_SENDER_IDX] = value;
+    }
+    fmi2Boolean FmiPushPull()
+    {
+        return boolean_vars_[FMI_BOOLEAN_PUSHPULL_IDX];
+    }
+    void SetFmiPushPull(fmi2Boolean value)
+    {
+        boolean_vars_[FMI_BOOLEAN_PUSHPULL_IDX] = value;
+    }
+    string FmiIp()
+    {
+        return string_vars_[FMI_STRING_IP_IDX];
+    }
+    void SetFmiIp(fmi2String value)
+    {
+        string_vars_[FMI_STRING_IP_IDX] = value;
+    }
+    string FmiPort()
+    {
+        return string_vars_[FMI_STRING_PORT_IDX];
+    }
+    void SetFmiPort(fmi2String value)
+    {
+        string_vars_[FMI_STRING_PORT_IDX] = value;
+    }
 };

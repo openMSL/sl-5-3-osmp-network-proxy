@@ -51,6 +51,9 @@
     <ScalarVariable name="receiver" valueReference="2" causality="parameter" variability="fixed" initial="exact">
       <Boolean start="false"/>
     </ScalarVariable>
+    <ScalarVariable name="pushpull" valueReference="3" causality="parameter" variability="fixed" initial="exact">
+      <Boolean start="true"/>
+    </ScalarVariable>
     <ScalarVariable name="ip" valueReference="0" causality="parameter" variability="fixed" initial="exact">
       <String start="127.0.0.1"/>
     </ScalarVariable>

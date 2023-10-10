@@ -12,12 +12,13 @@ The following FMI parameters can be set.
 Either `sender` or `receiver` have to be set to _true_.
 Otherwise, the FMU will return with an error.
 
-| Type    | Parameter  | Default     | Description                                |
-|---------|------------|-------------|--------------------------------------------|
-| Boolean | `sender`   | _true_      | Set if Proxy shall send data via TCP/IP    |
-| Boolean | `receiver` | _false_     | Set if Proxy shall receive data via TCP/IP |
-| String  | `ip`       | _127.0.0.1_ | IP address of TCP connection               |
-| String  | `port`     | _3456_      | Port of TCP connection                     |
+| Type    | Parameter  | Default     | Description                                                                                                                                                               |
+|---------|------------|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Boolean | `sender`   | _true_      | Set if Proxy shall send data via TCP/IP                                                                                                                                   |
+| Boolean | `receiver` | _false_     | Set if Proxy shall receive data via TCP/IP                                                                                                                                |
+| Boolean | `pushpull` | _false_     | If true, use [Push/Pull](https://learning-0mq-with-pyzmq.readthedocs.io/en/latest/pyzmq/patterns/pushpull.html) ZeroMQ configuration, if false, use [Client/Server](https://learning-0mq-with-pyzmq.readthedocs.io/en/latest/pyzmq/patterns/client_server.html) config. |
+| String  | `ip`       | _127.0.0.1_ | IP address of TCP connection                                                                                                                                              |
+| String  | `port`     | _3456_      | Port of TCP connection                                                                                                                                                    |
 
 ## Interface
 
