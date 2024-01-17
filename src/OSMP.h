@@ -126,7 +126,7 @@ class OSMP
     static fmi2Status DoEnterInitializationMode();
     fmi2Status DoExitInitializationMode();
     fmi2Status DoCalc(fmi2Real current_communication_point, fmi2Real communication_step_size, fmi2Boolean no_set_fmu_state_prior_to_current_pointfmi_2_component);
-    static fmi2Status DoTerm();
+    fmi2Status DoTerm();
     void DoFree();
     void ProcessMessage(zmq::message_t& message);
 
