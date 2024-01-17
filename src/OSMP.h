@@ -54,7 +54,8 @@
 #define FMI_INTEGER_OSI_OUT_BASELO_IDX 3
 #define FMI_INTEGER_OSI_OUT_BASEHI_IDX 4
 #define FMI_INTEGER_OSI_OUT_SIZE_IDX 5
-#define FMI_INTEGER_LAST_IDX FMI_INTEGER_OSI_OUT_SIZE_IDX
+#define FMI_INTEGER_WAIT_TIME_IDX 6
+#define FMI_INTEGER_LAST_IDX FMI_INTEGER_WAIT_TIME_IDX
 #define FMI_INTEGER_VARS (FMI_INTEGER_LAST_IDX + 1)
 
 /* Real Variables */
@@ -125,7 +126,7 @@ class OSMP
     static fmi2Status DoEnterInitializationMode();
     fmi2Status DoExitInitializationMode();
     fmi2Status DoCalc(fmi2Real current_communication_point, fmi2Real communication_step_size, fmi2Boolean no_set_fmu_state_prior_to_current_pointfmi_2_component);
-    static fmi2Status DoTerm();
+    fmi2Status DoTerm();
     void DoFree();
     void ProcessMessage(zmq::message_t& message);
 
@@ -276,5 +277,13 @@ class OSMP
     void SetFmiPort(fmi2String value)
     {
         string_vars_[FMI_STRING_PORT_IDX] = value;
+    }
+    int FmiWaitTime()
+    {
+        return integer_vars_[FMI_INTEGER_WAIT_TIME_IDX];
+    }
+    void SetFmiWaitTime(fmi2Integer value)
+    {
+        integer_vars_[FMI_INTEGER_WAIT_TIME_IDX] = value;
     }
 };

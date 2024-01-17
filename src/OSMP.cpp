@@ -136,6 +136,7 @@ fmi2Status OSMP::DoInit()
     SetFmiPushPull(1);
     SetFmiIp("127.0.0.1");
     SetFmiPort("3456");
+    SetFmiWaitTime(5);
 
     return fmi2OK;
 }
@@ -154,7 +155,6 @@ fmi2Status OSMP::DoExitInitializationMode()
 {
 
     string address = "tcp://" + FmiIp() + ":" + FmiPort();
-    std::cout << address << std::endl;
     const char* protocol = address.c_str();
 
     if (FmiSender() != 0)
@@ -167,8 +167,13 @@ fmi2Status OSMP::DoExitInitializationMode()
         {
             socket_ = zmq::socket_t(context_, ZMQ_REP);
         }
-        const int wait_time_ms = 5000;
-        zmq_setsockopt(socket_, ZMQ_SNDTIMEO, &wait_time_ms, sizeof(wait_time_ms));
+        if (FmiWaitTime() > 0)
+        {
+            const int wait_time_ms = FmiWaitTime() * 1000;
+            zmq_setsockopt(socket_, ZMQ_SNDTIMEO, &wait_time_ms, sizeof(wait_time_ms));
+        }
+        const int linger = 0;
+        zmq_setsockopt(socket_, ZMQ_LINGER, &linger, sizeof(linger));
         socket_.bind(protocol);
     }
     else
@@ -181,8 +186,13 @@ fmi2Status OSMP::DoExitInitializationMode()
         {
             socket_ = zmq::socket_t(context_, ZMQ_REQ);
         }
-        const int wait_time_ms = 5000;
-        zmq_setsockopt(socket_, ZMQ_RCVTIMEO, &wait_time_ms, sizeof(wait_time_ms));
+        if (FmiWaitTime() > 0)
+        {
+            const int wait_time_ms = FmiWaitTime() * 1000;
+            zmq_setsockopt(socket_, ZMQ_RCVTIMEO, &wait_time_ms, sizeof(wait_time_ms));
+        }
+        const int linger = 0;
+        zmq_setsockopt(socket_, ZMQ_LINGER, &linger, sizeof(linger));
         socket_.connect(protocol);
     }
 
@@ -256,6 +266,12 @@ fmi2Status OSMP::DoCalc(fmi2Real current_communication_point, fmi2Real communica
 
 fmi2Status OSMP::DoTerm()
 {
+    string address = "tcp://" + FmiIp() + ":" + FmiPort();
+    const char* protocol = address.c_str();
+    socket_.unbind(protocol);
+    socket_.close();
+    context_.shutdown();
+    context_.close();
     return fmi2OK;
 }
 
