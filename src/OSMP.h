@@ -54,7 +54,8 @@
 #define FMI_INTEGER_OSI_OUT_BASELO_IDX 3
 #define FMI_INTEGER_OSI_OUT_BASEHI_IDX 4
 #define FMI_INTEGER_OSI_OUT_SIZE_IDX 5
-#define FMI_INTEGER_LAST_IDX FMI_INTEGER_OSI_OUT_SIZE_IDX
+#define FMI_INTEGER_WAIT_TIME_IDX 6
+#define FMI_INTEGER_LAST_IDX FMI_INTEGER_WAIT_TIME_IDX
 #define FMI_INTEGER_VARS (FMI_INTEGER_LAST_IDX + 1)
 
 /* Real Variables */
@@ -276,5 +277,13 @@ class OSMP
     void SetFmiPort(fmi2String value)
     {
         string_vars_[FMI_STRING_PORT_IDX] = value;
+    }
+    int FmiWaitTime()
+    {
+        return integer_vars_[FMI_INTEGER_WAIT_TIME_IDX];
+    }
+    void SetFmiWaitTime(fmi2Integer value)
+    {
+        integer_vars_[FMI_INTEGER_WAIT_TIME_IDX] = value;
     }
 };

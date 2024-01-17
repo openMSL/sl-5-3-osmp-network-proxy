@@ -60,6 +60,9 @@
     <ScalarVariable name="port" valueReference="1" causality="parameter" variability="fixed" initial="exact">
       <String start="3456"/>
     </ScalarVariable>
+    <ScalarVariable name="wait_time_in_s" valueReference="6" causality="parameter" variability="fixed" initial="exact">
+      <Integer start="5"/>
+    </ScalarVariable>
   </ModelVariables>
   <ModelStructure>
     <Outputs>
