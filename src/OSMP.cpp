@@ -173,7 +173,7 @@ fmi2Status OSMP::DoExitInitializationMode()
             zmq_setsockopt(socket_, ZMQ_SNDTIMEO, &wait_time_ms, sizeof(wait_time_ms));
         }
         const int linger = 0;
-        zmq_setsockopt(socket_, ZMQ_LINGER, &linger, sizeof (linger));
+        zmq_setsockopt(socket_, ZMQ_LINGER, &linger, sizeof(linger));
         socket_.bind(protocol);
     }
     else
@@ -192,7 +192,7 @@ fmi2Status OSMP::DoExitInitializationMode()
             zmq_setsockopt(socket_, ZMQ_RCVTIMEO, &wait_time_ms, sizeof(wait_time_ms));
         }
         const int linger = 0;
-        zmq_setsockopt(socket_, ZMQ_LINGER, &linger, sizeof (linger));
+        zmq_setsockopt(socket_, ZMQ_LINGER, &linger, sizeof(linger));
         socket_.connect(protocol);
     }
 
