@@ -87,7 +87,7 @@
   </ModelVariables>
   <ModelStructure>
     <Outputs>
-      <Unknown index="6"/>
+      <Unknown index="7"/>
     </Outputs>
   </ModelStructure>
 </fmiModelDescription>
